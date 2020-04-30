@@ -1,0 +1,57 @@
+default_platform(:ios)
+
+platform :ios do
+
+  desc "Deploy an Ad Hoc build to Firebase App Distribution"
+  lane :deploy_firebase_ios do
+    buildNumber = DateTime.now.strftime("%y%m%d%H%M")
+    puts "Setting build number to " + buildNumber
+    increment_build_number(
+      xcodeproj: "<%= props.workspace %>.xcodeproj",
+      build_number: buildNumber
+    )
+
+    build_app(
+      workspace: "<%= props.workspace %>.xcworkspace",
+      scheme: "<%= props.scheme %>",
+      configuration: "Release",
+      export_options: {
+        method: "ad-hoc",
+        provisioningProfiles: {
+          "<%= props.bundleId %>" => "Osedea Ad Hoc"
+        }
+      }
+    )
+
+    firebase_app_distribution(
+      app: "<%= props.iosFirebaseApp %>",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"],
+      release_notes: changelog_from_git_commits(commits_count: 1),
+      groups: "osedea-ios",
+    )
+  end
+
+  desc "Build app and upload it to TestFlight"
+  lane :deploy_testflight_ios do
+    if ENV['BITRISE_GIT_TAG']
+      increment_version_number(
+        version_number: ENV['BITRISE_GIT_TAG'].sub(/^v/, '')
+      )
+    end
+
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1,
+    )
+
+    gym(
+      workspace: "<%= props.workspace %>.xcworkspace",
+      scheme: "<%= props.scheme %>",
+      configuration: "Release"
+    )
+    pilot(
+      skip_submission: true,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+end

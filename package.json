@@ -1,0 +1,11 @@
+{
+  "name": "ignite-fastlane",
+  "version": "1.0.0",
+  "description": "Ignite plugin to setup fastlane for React Native applications",
+  "main": "plugin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Morton",
+  "license": "MIT"
+}

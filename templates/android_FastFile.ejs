@@ -1,0 +1,65 @@
+default_platform(:android)
+
+platform :android do
+
+  desc "Deploy a build to Firebase App Distribution"
+  lane :deploy_firebase_android do
+    versionCode = DateTime.now.strftime("%y%m%d%H%M").to_i
+    puts "Setting version code to " + versionCode.to_s
+
+    gradle(
+      task: "clean assembleRelease",
+      properties: {
+        "versionCode" => versionCode
+      }
+    )
+
+    firebase_app_distribution(
+      app: "<%= props.androidFirebaseApp %>",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"],
+      release_notes: changelog_from_git_commits(commits_count: 1),
+      groups: "osedea-android",
+    )
+  end
+
+  desc "Submit a new Internal Build to Google Play"
+  lane :deploy_google_play_android do
+    versionCodesProduction = google_play_track_version_codes(track: 'production')
+    versionCodesBeta = google_play_track_version_codes(track: 'beta')
+    versionCodesAlpha = google_play_track_version_codes(track: 'alpha')
+    versionCodesInternal = google_play_track_version_codes(track: 'internal')
+
+    allVersionCodes = versionCodesProduction.concat(versionCodesBeta ? versionCodesBeta : []).concat(versionCodesAlpha ? versionCodesAlpha : []).concat(versionCodesInternal ? versionCodesInternal : [])
+    maxVersionCode = allVersionCodes.max_by{|x| x.to_i}
+
+    versionCode = maxVersionCode + 1
+
+    puts 'Setting the version code to:'
+    puts versionCode
+
+    if ENV['BITRISE_GIT_TAG']
+      gradle(
+        task: "clean assembleRelease",
+        properties: {
+          "versionCode" => versionCode,
+          "versionName" => ENV['BITRISE_GIT_TAG'].sub(/^v/, '')
+        }
+      )
+    elsif
+      gradle(
+        task: "clean assembleRelease",
+        properties: {
+          "versionCode" => versionCode
+        }
+      )
+    end
+
+    supply(
+      track: 'internal',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+end
