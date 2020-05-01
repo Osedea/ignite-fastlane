@@ -96,7 +96,7 @@ const add = async function (toolbox) {
         await spawnIt('bundle exec fastlane init', { cwd: PATH, stdio: 'inherit' });
         const pluginFilePath = `${PATH}/fastlane/Pluginfile`;
         if (!filesystem.exists(pluginFilePath) || !patching.exists(pluginFilePath, 'firebase_app_distribution')) {
-            await spawnIt('bundle exec fastlane add_plugin firebase_app_distribution', { cwd: `${PATH}/fastlane`, stdio: 'inherit' });
+            await spawnIt('bundle exec fastlane add_plugin firebase_app_distribution', { cwd: PATH, stdio: 'inherit' });
         }
 
         await templateIt(`${platform}_FastFile.ejs`, `${PATH}/fastlane/FastFile`);

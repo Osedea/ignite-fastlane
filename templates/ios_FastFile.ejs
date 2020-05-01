@@ -1,3 +1,5 @@
+# 1. You can get a provisioning profile's name by right clicking on it in Finder -> Get Info -> Look at the first line in the "Preview" section at the bottom (above "Expires in...")
+
 default_platform(:ios)
 
 platform :ios do
@@ -11,14 +13,23 @@ platform :ios do
       build_number: buildNumber
     )
 
-    build_app(
+    profileName = "Osedea Ad Hoc" # see 1. at top of file
+
+    update_code_signing_settings(
+      code_sign_identity: "iPhone Distribution",
+      team_id: "<%= props.devTeamId %>",
+      profile_name: profileName,
+      bundle_identifier: "<%= props.bundleId %>"
+    )
+
+    build_ios_app(
       workspace: "<%= props.workspace %>.xcworkspace",
       scheme: "<%= props.scheme %>",
       configuration: "Release",
       export_options: {
         method: "ad-hoc",
         provisioningProfiles: {
-          "<%= props.bundleId %>" => "Osedea Ad Hoc"
+          "<%= props.bundleId %>" => profileName
         }
       }
     )
@@ -27,7 +38,7 @@ platform :ios do
       app: "<%= props.iosFirebaseApp %>",
       firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"],
       release_notes: changelog_from_git_commits(commits_count: 1),
-      groups: "osedea-ios",
+      # groups: "osedea-ios",
     )
   end
 
@@ -43,10 +54,25 @@ platform :ios do
       build_number: latest_testflight_build_number + 1,
     )
 
-    gym(
+    profileName = "Osedea Release" # see 1. at top of file
+
+    update_code_signing_settings(
+      code_sign_identity: "iPhone Distribution",
+      team_id: "<%= props.devTeamId %>",
+      profile_name: profileName,
+      bundle_identifier: "<%= props.bundleId %>"
+    )
+
+    build_ios_app(
       workspace: "<%= props.workspace %>.xcworkspace",
       scheme: "<%= props.scheme %>",
-      configuration: "Release"
+      configuration: "Release",
+      export_options: {
+        method: "app-store",
+        provisioningProfiles: {
+          "<%= props.bundleId %>" => profileName
+        }
+      }
     )
     pilot(
       skip_submission: true,
