@@ -1,8 +1,16 @@
+require 'spaceship'
+
 # 1. You can get a provisioning profile's name by right clicking on it in Finder -> Get Info -> Look at the first line in the "Preview" section at the bottom (above "Expires in...")
 
 default_platform(:ios)
 
 platform :ios do
+
+  desc "List App Store Connect teams to get the ID (itc_team_id)"
+  lane :get_itc_team do
+    Spaceship::Tunes.login
+    Spaceship::Tunes.select_team
+  end
 
   desc "Deploy an Ad Hoc build to Firebase App Distribution"
   lane :deploy_firebase_ios do

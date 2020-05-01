@@ -24,6 +24,8 @@ platform :android do
 
   desc "Submit a new Internal Build to Google Play"
   lane :deploy_google_play_android do
+    # If this is the first time running this lane google_play_track_version_codes and supply won't work until you manually upload an APK at once to the Google Play Console
+    # You can do this by essentially only running the gradle step below. If you do it on Bitrise with the Deploy to Bitrise step then you should be able to download the apk from the Artifacts tab of the build and manually upload it to Google Play Console
     versionCodesProduction = google_play_track_version_codes(track: 'production')
     versionCodesBeta = google_play_track_version_codes(track: 'beta')
     versionCodesAlpha = google_play_track_version_codes(track: 'alpha')
