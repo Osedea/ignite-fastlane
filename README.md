@@ -5,7 +5,7 @@ Add default Fastlane setup to the project.
 ## Usage
 
 ```sh
-ignite add git@github.com:Osedea/ignite-fastlane.git#v1.0.0
+ignite add git@github.com:Osedea/ignite-fastlane.git#v1.1.0
 
 ignite remove ignite-fastlane
 ```
